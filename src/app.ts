@@ -25,6 +25,8 @@ app.get("/", (req: Request, res: Response)=>{
 
 import auth from "./routes/auth.routes.js";
 app.use("/auth", auth);
+import { verifyEmail } from './controllers/otp/verify-email.controller.js';
+app.get('/verify-email', verifyEmail);
 import otp from "./routes/otp.routes.js";
 app.use("/otp", otp);
 import user from "./routes/user.routes.js";

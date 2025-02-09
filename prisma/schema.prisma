@@ -27,7 +27,7 @@ model User {
   updatedAt      DateTime @updatedAt
 
   sessions       Session[]
-  otps           OTP[]
+  otps           Otp[]
 }
 
 model Session {
@@ -39,14 +39,13 @@ model Session {
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
-model OTP {
+model Otp {
   id        String   @id @default(uuid())
-  userId    String
-  code      String
-  expiresAt DateTime
+  email     String   @unique
+  code      String  
   createdAt DateTime @default(now())
-
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime 
+  user      User     @relation(fields: [email], references: [email], onDelete: Cascade)
 }
 
 enum Role {

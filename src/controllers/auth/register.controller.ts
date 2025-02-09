@@ -3,7 +3,7 @@
     import { hashPassword } from "../../utils/hash.util";
     import { prisma } from "../../config/db.config";
     import { Prisma } from "@prisma/client";
-    import { createAccessToken, createRefreshToken } from "../../utils/jwt.util";
+    import { createAccessToken, createRefreshToken, createVerificationToken } from "../../utils/jwt.util";
     import { randomUUID } from "crypto";
 import { sendToQueue } from "../../utils/email.util";
 
@@ -54,12 +54,13 @@ import { sendToQueue } from "../../utils/email.util";
 
             res.setHeader("Authorization", `Bearer ${accessToken}`);
 
+            const code = createVerificationToken(user.email);
             sendToQueue({
                 to: user.email,
                 subject: "Welcome to Auth | Email verification Link",
-                text: "click on this link to verify your email."
+                name: user.name,
+                code: code
             });
-            // sendOtpEmail(user.email, otp, 'Email Verification OTP', `Your OTP for email verification is: ${otp}. It is valid for 10 minutes.`);
             
             user.password = "";
             return responseCodes.success.created(res, user, "User created successfully && verification email sent");

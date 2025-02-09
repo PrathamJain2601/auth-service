@@ -20,6 +20,15 @@ const createAccessToken = (id: string) => {
     return token;
 }
 
+const createVerificationToken = (id: string) => {
+    const VERIFICATION_TOKEN_SECRET = process.env.VERIFICATION_TOKEN_SECRET;
+    if(!VERIFICATION_TOKEN_SECRET){
+        throw new Error("Missing VERIFICATION_TOKEN_SECRET in environment variables.");
+    }
+    const token = jwt.sign({sub: id}, VERIFICATION_TOKEN_SECRET, {expiresIn: "10m"});
+    return token;
+}
+
 const verifyRefreshToken = (token: string) => {
     const REFRESH_TOKEN_SECRET = process.env.REFRESH_TOKEN_SECRET;
     if(!REFRESH_TOKEN_SECRET){
@@ -38,4 +47,13 @@ const verifyAccessToken = (token: string) => {
     return decoded;
 }
 
-export {createRefreshToken, createAccessToken, verifyAccessToken, verifyRefreshToken};
+const verifyVerificationToken = (token: string) => {
+    const VERIFICATION_TOKEN_SECRET = process.env.VERIFICATION_TOKEN_SECRET;
+    if(!VERIFICATION_TOKEN_SECRET){
+        throw new Error("Missing VERIFICATION_TOKEN_SECRET in environment variables.");
+    }
+    const decoded = jwt.verify(token, VERIFICATION_TOKEN_SECRET) as { sub: string };
+    return decoded;
+}
+
+export {createRefreshToken, createAccessToken, verifyAccessToken, verifyRefreshToken, createVerificationToken, verifyVerificationToken};

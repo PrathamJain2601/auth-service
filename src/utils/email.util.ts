@@ -4,8 +4,9 @@ dotenv.config();
 
 export type emailData = {
     subject: string,
-    text: string,
     to: string
+    code: string
+    name: string
 }
 
 export const sendToQueue = async (emailData: emailData) => {

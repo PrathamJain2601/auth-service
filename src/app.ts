@@ -3,9 +3,11 @@ import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import {Response, Request} from "express";
 import dotenv from "dotenv";
+import { startConsumer } from './config/rabbitmq.config.js';
 dotenv.config();
 
 const app = express();
+startConsumer();
 const PORT = process.env.PORT || 8000;
 app.use(express.json());
 app.use(cookieParser());

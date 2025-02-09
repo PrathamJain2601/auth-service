@@ -10,6 +10,21 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.deleteProfile = void 0;
-const deleteProfile = (_a) => __awaiter(void 0, [_a], void 0, function* ({ req, res }) {
+const db_config_1 = require("../../config/db.config");
+const response_codes_util_1 = require("../../utils/response-codes.util");
+const deleteProfile = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const { id } = req.body;
+        yield db_config_1.prisma.user.delete({
+            where: {
+                id: id
+            }
+        });
+        return response_codes_util_1.responseCodes.success.ok(res, "Profile deleted successfully");
+    }
+    catch (e) {
+        console.log(e);
+        response_codes_util_1.responseCodes.serverError.internalServerError(res, "internal server error");
+    }
 });
 exports.deleteProfile = deleteProfile;

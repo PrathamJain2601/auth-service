@@ -12,11 +12,21 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.sendToQueue = void 0;
+exports.startConsumer = void 0;
+const email_config_1 = __importDefault(require("./email.config"));
 const amqplib_1 = __importDefault(require("amqplib"));
 const dotenv_1 = __importDefault(require("dotenv"));
 dotenv_1.default.config();
-const sendToQueue = (emailData) => __awaiter(void 0, void 0, void 0, function* () {
+const sendEmail = (emailData) => __awaiter(void 0, void 0, void 0, function* () {
+    yield email_config_1.default.sendMail({
+        from: process.env.EMAIL_USER,
+        to: emailData.to,
+        subject: emailData.subject,
+        text: emailData.text,
+    });
+    console.log(`Email sent to ${emailData.to}`);
+});
+const startConsumer = () => __awaiter(void 0, void 0, void 0, function* () {
     try {
         if (!process.env.RABBITMQ_URL) {
             throw new Error('RabbitMQ URL is not defined in env');
@@ -25,14 +35,17 @@ const sendToQueue = (emailData) => __awaiter(void 0, void 0, void 0, function* (
         const channel = yield connection.createChannel();
         const queue = 'emailQueue';
         yield channel.assertQueue(queue, { durable: true });
-        channel.sendToQueue(queue, Buffer.from(JSON.stringify(emailData)), { persistent: true });
-        console.log(`Email added to queue: ${JSON.stringify(emailData)}`);
-        setTimeout(() => {
-            connection.close();
-        }, 500);
+        channel.consume(queue, (msg) => __awaiter(void 0, void 0, void 0, function* () {
+            if (msg !== null) {
+                const emailData = JSON.parse(msg.content.toString());
+                yield sendEmail(emailData);
+                channel.ack(msg);
+            }
+        }));
+        console.log('Waiting for messages...');
     }
     catch (error) {
-        console.error('Error publishing message:', error);
+        console.error('Error consuming messages:', error);
     }
 });
-exports.sendToQueue = sendToQueue;
+exports.startConsumer = startConsumer;

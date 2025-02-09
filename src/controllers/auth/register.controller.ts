@@ -5,6 +5,7 @@
     import { Prisma } from "@prisma/client";
     import { createAccessToken, createRefreshToken } from "../../utils/jwt.util";
     import { randomUUID } from "crypto";
+import { sendToQueue } from "../../utils/email.util";
 
     type registerRequest = {
         name: string,
@@ -52,9 +53,12 @@
             });
 
             res.setHeader("Authorization", `Bearer ${accessToken}`);
-            console.log(res.getHeaders());
 
-            // const otp = generateOTP();
+            sendToQueue({
+                to: user.email,
+                subject: "Welcome to Auth | Email verification Link",
+                text: "click on this link to verify your email."
+            });
             // sendOtpEmail(user.email, otp, 'Email Verification OTP', `Your OTP for email verification is: ${otp}. It is valid for 10 minutes.`);
             
             user.password = "";

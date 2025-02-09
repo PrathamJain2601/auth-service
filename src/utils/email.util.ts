@@ -1,35 +1,33 @@
-import transporter from "../config/email.config"
+import amqp from 'amqplib';
+import dotenv from 'dotenv';
+dotenv.config();
 
-type text = {
+export type emailData = {
     subject: string,
-    html: string
+    text: string,
+    to: string
 }
 
-export const sendEmail = async (toEmail: string, text: text) => {
-    try{
-        const mailOptions = {
-            from: "Auth <Auth@gmail.com>",
-            to: toEmail,
-            subject: text.subject,
-            html: text.html,
-          };
-      
-          await transporter.sendMail(mailOptions);
-          return true;
-    }
-    catch (error) {
-        console.error('Error sending OTP email:', error);
-        return false;
-    }
-}
-
-export const emailTemplates = {
-    otp: (otp: number) => {
-        return {
-            subject:`Email verification otp`,
-            html: `<h1> congratulation on starting yout journey on Auth </h1>
-                <p> Your email verification otp is ${otp}. It is valid for only 10 minutes </p>
-            `
+export const sendToQueue = async (emailData: emailData) => {
+    try {
+        if (!process.env.RABBITMQ_URL) {
+            throw new Error('RabbitMQ URL is not defined in env');
         }
+        const connection = await amqp.connect(process.env.RABBITMQ_URL);
+        const channel = await connection.createChannel();
+        const queue = 'emailQueue';
+
+        await channel.assertQueue(queue, { durable: true });
+        channel.sendToQueue(queue, Buffer.from(JSON.stringify(emailData)), { persistent: true });
+
+        console.log(`Email added to queue: ${JSON.stringify(emailData)}`);
+
+        setTimeout(() => {
+            connection.close();
+        }, 500);
+    } catch (error) {
+        console.error('Error publishing message:', error);
     }
-}
+};
+
+

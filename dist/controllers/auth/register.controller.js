@@ -16,6 +16,7 @@ const db_config_1 = require("../../config/db.config");
 const client_1 = require("@prisma/client");
 const jwt_util_1 = require("../../utils/jwt.util");
 const crypto_1 = require("crypto");
+const email_util_1 = require("../../utils/email.util");
 const register = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;
     let { name, username, email, password } = req.body;
@@ -50,11 +51,14 @@ const register = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
             path: "/",
         });
         res.setHeader("Authorization", `Bearer ${accessToken}`);
-        console.log(res.getHeaders());
-        // const otp = generateOTP();
+        (0, email_util_1.sendToQueue)({
+            to: user.email,
+            subject: "Welcome to Auth | Email verification Link",
+            text: "click on this link to verify your email."
+        });
         // sendOtpEmail(user.email, otp, 'Email Verification OTP', `Your OTP for email verification is: ${otp}. It is valid for 10 minutes.`);
         user.password = "";
-        return response_codes_util_1.responseCodes.success.created(res, user, "User created successfully");
+        return response_codes_util_1.responseCodes.success.created(res, user, "User created successfully && verification email sent");
     }
     catch (error) {
         console.log(error);

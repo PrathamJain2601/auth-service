@@ -10,6 +10,36 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getProfile = void 0;
-const getProfile = (_a) => __awaiter(void 0, [_a], void 0, function* ({ req, res }) {
+const db_config_1 = require("../../config/db.config");
+const response_codes_util_1 = require("../../utils/response-codes.util");
+const getProfile = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { id } = req.body;
+    try {
+        const user = yield db_config_1.prisma.user.findUnique({
+            select: {
+                name: true,
+                id: true,
+                email: true,
+                username: true,
+                avatar: true,
+                isVerified: true,
+                updatedAt: true,
+                createdAt: true,
+                role: true,
+                company: true
+            },
+            where: {
+                id: id
+            }
+        });
+        if (!user) {
+            return response_codes_util_1.responseCodes.serverError.internalServerError(res, "User not found some internal error");
+        }
+        return response_codes_util_1.responseCodes.success.ok(res, user, "user fetched");
+    }
+    catch (e) {
+        console.log(e);
+        return response_codes_util_1.responseCodes.serverError.internalServerError(res, "internal server error");
+    }
 });
 exports.getProfile = getProfile;

@@ -2,12 +2,14 @@ import { Request, Response } from "express";
 import { prisma } from "../../config/db.config";
 import { verifyVerificationToken } from "../../utils/jwt.util";
 import { responseCodes } from "../../utils/response-codes.util";
+import { emailTemplates } from "../../utils/email-templates.util";
 
-const verifyEmail = async (req: Request, res: Response) => {
+const verifyEmail = async (req: Request, res: Response): Promise<void> => { 
     const { token } = req.query;
 
     if (!token) {
-        return responseCodes.clientError.badRequest(res, null, "Token is required");
+        res.status(400).send(emailTemplates.renderResponse("Token is required", false));
+        return;
     }
 
     try {
@@ -19,11 +21,13 @@ const verifyEmail = async (req: Request, res: Response) => {
         });
 
         if (!user) {
-            return responseCodes.clientError.notFound(res, "User not found");
+            res.status(404).send(emailTemplates.renderResponse("User not found", false));
+            return;
         }
 
         if (user.isVerified) {
-            return responseCodes.clientError.badRequest(res, null, "Email already verified");
+            res.status(400).send(emailTemplates.renderResponse("Email already verified", false));
+            return;
         }
 
         const otpRecord = await prisma.otp.findFirst({
@@ -32,14 +36,16 @@ const verifyEmail = async (req: Request, res: Response) => {
         });
 
         if (!otpRecord) {
-            return responseCodes.clientError.badRequest(res, null, "OTP not found");
+            res.status(400).send(emailTemplates.renderResponse("OTP not found", false));
+            return;
         }
 
         const currentTime = new Date();
-        const otpExpirationTime = otpRecord.createdAt.getTime() + 10 * 60 * 1000 * 6 * 24; 
+        const otpExpirationTime = otpRecord.createdAt.getTime() + 10 * 60 * 1000;
 
         if (currentTime.getTime() > otpExpirationTime) {
-            return responseCodes.clientError.badRequest(res, null, "OTP has expired");
+            res.status(400).send(emailTemplates.renderResponse("OTP has expired", false));
+            return;
         }
 
         await prisma.user.update({
@@ -51,10 +57,10 @@ const verifyEmail = async (req: Request, res: Response) => {
             where: { id: otpRecord.id },
         });
 
-        return responseCodes.success.ok(res, null, "Email successfully verified");
+        res.status(200).send(emailTemplates.renderResponse("Email successfully verified!", true));
     } catch (error) {
         console.error("Error verifying email: ", error);
-        return responseCodes.serverError.internalServerError(res, "An error occurred while verifying the email");
+        res.status(500).send(emailTemplates.renderResponse("An error occurred while verifying the email", false));
     }
 };
 

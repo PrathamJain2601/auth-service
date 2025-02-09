@@ -22,4 +22,57 @@ export const emailTemplates = {
             </html>
         `;
     },
+    renderResponse: (message: string, success: boolean) => {
+        return `
+        <html>
+            <head>
+                <title>Email Verification</title>
+                <style>
+                    body {
+                        font-family: Arial, sans-serif;
+                        text-align: center;
+                        background-color: ${success ? "#e8f5e9" : "#ffebee"};
+                        padding: 50px;
+                    }
+                    .container {
+                        max-width: 400px;
+                        margin: auto;
+                        background: white;
+                        padding: 20px;
+                        border-radius: 10px;
+                        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+                    }
+                    .status {
+                        font-size: 22px;
+                        font-weight: bold;
+                        color: ${success ? "green" : "red"};
+                    }
+                    .icon {
+                        font-size: 50px;
+                        margin-bottom: 10px;
+                    }
+                    .icon.success {
+                        color: green;
+                    }
+                    .icon.error {
+                        color: red;
+                    }
+                    .message {
+                        margin-top: 10px;
+                        font-size: 16px;
+                    }
+                </style>
+            </head>
+            <body>
+                <div class="container">
+                    <div class="icon ${success ? "success" : "error"}">
+                        ${success ? "✔️" : "❌"}
+                    </div>
+                    <div class="status">${success ? "Success!" : "Error"}</div>
+                    <div class="message">${message}</div>
+                </div>
+            </body>
+        </html>
+        `;
+    }
 };

@@ -36,7 +36,7 @@ import { sendToQueue } from "../../utils/email.util";
             })
 
             const refreshToken = createRefreshToken(user.id);
-            const accessToken = createAccessToken(user.id);
+            const accessToken = createAccessToken(user.id, user.isVerified);
 
             await prisma.session.create({
                 data: {
@@ -61,7 +61,7 @@ import { sendToQueue } from "../../utils/email.util";
                 name: user.name,
                 code: code
             });
-            
+
             user.password = "";
             return responseCodes.success.created(res, user, "User created successfully && verification email sent");
         }

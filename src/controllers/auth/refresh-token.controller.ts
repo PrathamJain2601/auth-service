@@ -24,7 +24,7 @@ export const refreshAccessToken = async (req: Request, res: Response) => {
             return responseCodes.clientError.notFound(res, "User not found");
         }
 
-        const newAccessToken = createAccessToken(user.id);
+        const newAccessToken = createAccessToken(user.id, user.isVerified);
 
         res.setHeader("Authorization", `Bearer ${newAccessToken}`);
 

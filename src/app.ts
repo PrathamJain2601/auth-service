@@ -30,8 +30,13 @@ app.get('/verify-email', verifyEmail);
 import otp from "./routes/otp.routes.js";
 app.use("/otp", otp);
 import user from "./routes/user.routes.js";
+import { isAuthorized } from './middlewares/auth.middleware.js';
 app.use("/user", user);
 
+app.get("/protected-route", isAuthorized, (req, res)=>{
+    res.send("This is a protected route");
+    return;
+})
 
 app.listen(PORT, ()=>{
     console.log(`server running on port ${process.env.PORT}`);

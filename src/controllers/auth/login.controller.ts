@@ -65,7 +65,7 @@ export const login: RequestHandler = async (req: Request, res: Response, next: N
             return responseCodes.clientError.forbidden(res, "wrong email or password");
         }
 
-        const accessToken = createAccessToken(user.id);
+        const accessToken = createAccessToken(user.id, user.isVerified);
         if(await checkToken(refreshToken, user.id)){
             const newRefreshToken = createRefreshToken(user.id);
     

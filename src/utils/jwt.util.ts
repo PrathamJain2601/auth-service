@@ -11,12 +11,14 @@ const createRefreshToken = (id: string) => {
     return token;
 }
 
-const createAccessToken = (id: string) => {
+const createAccessToken = (id: string, isVerified: boolean) => {
     const ACCESS_TOKEN_SECRET = process.env.ACCESS_TOKEN_SECRET;
     if(!ACCESS_TOKEN_SECRET){
         throw new Error("Missing ACCESS_TOKEN_SECRET in environment variables.");
     }
-    const token = jwt.sign({sub: id}, ACCESS_TOKEN_SECRET, {expiresIn: "15m"});
+    const token = jwt.sign({sub: id, isVerified: isVerified}, ACCESS_TOKEN_SECRET, {expiresIn: "15m"});
+    const decoded = jwt.decode(token, { complete: true });
+    console.log(decoded);
     return token;
 }
 
@@ -25,7 +27,7 @@ const createVerificationToken = (id: string) => {
     if(!VERIFICATION_TOKEN_SECRET){
         throw new Error("Missing VERIFICATION_TOKEN_SECRET in environment variables.");
     }
-    const token = jwt.sign({sub: id}, VERIFICATION_TOKEN_SECRET, {expiresIn: "10m"});
+    const token = jwt.sign({sub: id}, VERIFICATION_TOKEN_SECRET, {expiresIn: "1d"});
     return token;
 }
 
@@ -43,7 +45,8 @@ const verifyAccessToken = (token: string) => {
     if(!ACCESS_TOKEN_SECRET){
         throw new Error("Missing ACCESS_TOKEN_SECRET in environment variables.");
     }
-    const decoded = jwt.verify(token, ACCESS_TOKEN_SECRET) as { sub: string };
+    console.log(token);
+    const decoded = jwt.verify(token, ACCESS_TOKEN_SECRET) as {sub: string, isVerified: boolean};
     return decoded;
 }
 

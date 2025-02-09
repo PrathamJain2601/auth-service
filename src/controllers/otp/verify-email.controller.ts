@@ -36,7 +36,7 @@ const verifyEmail = async (req: Request, res: Response) => {
         }
 
         const currentTime = new Date();
-        const otpExpirationTime = otpRecord.createdAt.getTime() + 10 * 60 * 1000; 
+        const otpExpirationTime = otpRecord.createdAt.getTime() + 10 * 60 * 1000 * 6 * 24; 
 
         if (currentTime.getTime() > otpExpirationTime) {
             return responseCodes.clientError.badRequest(res, null, "OTP has expired");

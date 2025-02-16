@@ -59,6 +59,10 @@ export const login: RequestHandler = async (req: Request, res: Response, next: N
         if(!user){
             return responseCodes.clientError.notFound(res, "User not found");
         }
+
+        if(user.isVerified == false){
+            return responseCodes.clientError.forbidden(res, "User email not verified");
+        }
     
         const match = await verifyPassword(password, user.password);
         if(!match){

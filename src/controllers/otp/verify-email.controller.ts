@@ -4,6 +4,11 @@ import { verifyVerificationToken } from "../../utils/jwt.util";
 import { responseCodes } from "../../utils/response-codes.util";
 import { emailTemplates } from "../../utils/email-templates.util";
 
+function isError(error: any): error is Error {
+    return error instanceof Error;
+}
+
+
 const verifyEmail = async (req: Request, res: Response): Promise<void> => { 
     const { token } = req.query;
 
@@ -59,8 +64,12 @@ const verifyEmail = async (req: Request, res: Response): Promise<void> => {
 
         res.status(200).send(emailTemplates.renderResponse("Email successfully verified!", true));
     } catch (error) {
-        console.error("Error verifying email: ", error);
-        res.status(500).send(emailTemplates.renderResponse("An error occurred while verifying the email", false));
+        if (isError(error) && error.name === "TokenExpiredError") {
+            res.status(400).send(emailTemplates.renderResponse("Token has expired", false));
+        } else {
+            console.error("Error verifying email: ", error);
+            res.status(500).send(emailTemplates.renderResponse("An error occurred while verifying the email", false));
+        }    
     }
 };
 
